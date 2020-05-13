@@ -25,6 +25,16 @@ public class hashload {
 	private static final int ACCESS_DESC_SIZE = 81;
 	private static final int LOCATION_SIZE = 27;
 	
+	private static final int RECORD_SIZE = 
+			10*INT_SIZE+2*DOUBLE_SIZE
+			+BUILDING_NAME_SIZE
+			+STREET_ADDRESS_SIZE
+			+SUBURB_SIZE
+			+SPACE_USAGE_SIZE
+			+ACCESS_TYPE_SIZE
+			+ACCESS_DESC_SIZE
+			+LOCATION_SIZE;
+	
 	// Must be able to execute the following: java dbload -p pagesize datafile
 	public static void main(String[] args) {
 		final long full_start_time = System.nanoTime();
@@ -55,7 +65,10 @@ public class hashload {
 				// A Counter for the Buffer of r_page
 				int byte_count = 0;
 				// A Page Counter
-				int page_number = 1;
+				int page_number = 0;
+				// A Total File Offset Counter
+				int total_file_offset = 0;
+				
 				// Recording the Start Time
 				final long hash_calc_start_time = System.nanoTime();
 
@@ -105,8 +118,19 @@ public class hashload {
 						new_record.set_location(hm.byte_buffer_to_string(read_page, byte_count, LOCATION_SIZE));
 						byte_count+=LOCATION_SIZE;
 						
+						// Keeps Track of Page-Record File Offset
+						total_file_offset+=RECORD_SIZE;
 						// Test Record Read
-						new_record.record_display_simple();
+						//new_record.record_display_simple();
+						//System.out.println(total_file_offset);
+						//System.out.println(hm.record_to_hash(new_record));
+						hm.record_to_hash(new_record);
+						
+						// Linux Commands for Testing Occupancy
+						// java hashload 4096 heap.4096 > log.txt
+						// sort log.txt | uniq -d > log_uniq.txt
+						
+						//System.out.println(new_record.hashCode());
 					}
 					
 					// Reset the Buffer
@@ -115,6 +139,8 @@ public class hashload {
 					byte_count = 0;
 					// Increment Page Counter
 					page_number++;
+					// Keeps Track of Page File Offset
+					total_file_offset = page_number*page_size;
 					if(page_number == 10) break;
 					
 				}

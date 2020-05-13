@@ -34,10 +34,21 @@ public class HMethods {
 	public static final int Y_COOR = 17;
 	public static final int LOCATION = 18;
 	
-	// ---------------------- Hashing Properties ----------------------- //
+		// -------------------- Hashing Properties --------------------- //
 	private static final int PRIME_ONE = 438439;
 	private static final int PRIME_TWO = 34723753;
 	private static final int PRIME_THREE = 376307;
+		// -------------- Suitable Size for 70% Occupancy -------------- //
+	private static final int HASH_TABLE_SIZE = 300000;
+	
+	// Method to return Hashvalue of Record
+	public int record_to_hash(Record record) {
+		int key = record.hashCode();
+		// Lecture 6 for Source of Hashing Function
+		int result = ((PRIME_ONE*key + PRIME_TWO) % PRIME_THREE) % HASH_TABLE_SIZE;
+		// Get Correct Positive Value 
+		return (result < 0) ? result*-1 : result;
+	}
 	
 	// Method to Validate the Input Arguements for hashload
 	public boolean input_validation_hashload(String[] args) {
@@ -101,55 +112,11 @@ public class HMethods {
 		return result.toString();
 	}
 	
-	// Method to Create a Record
-	public Record create_record(String[] data, int line_number) {
-		Record new_record = new Record();
-		boolean record_failed = false;
-		try {
-			// Do NULL Checks are Replace them with Integer.MAX_VALUE
-			if(data[CONSTRUCT_YR].equals("")) data[CONSTRUCT_YR] = Integer.toString(Integer.MAX_VALUE);
-			if(data[REFURBISHED_YR].equals("")) data[REFURBISHED_YR] = Integer.toString(Integer.MAX_VALUE);
-			if(data[ACCESS_RATING].equals(""))data[ACCESS_RATING] = Integer.toString(Integer.MAX_VALUE);
-			if(data[BICYCLE_SPACES].equals("")) data[BICYCLE_SPACES] = Integer.toString(Integer.MAX_VALUE);
-			if(data[HAS_SHOWERS].equals("")) data[HAS_SHOWERS] = Integer.toString(Integer.MAX_VALUE);
-			if(data[X_COOR].equals("")) data[X_COOR] = Integer.toString(Integer.MAX_VALUE);
-			if(data[Y_COOR].equals("")) data[Y_COOR] = Integer.toString(Integer.MAX_VALUE);
-
-			new_record.set_census_yr(Integer.parseInt(data[CENSUS_YR].trim()));
-			new_record.set_block_id(Integer.parseInt(data[BLOCK_ID].trim()));
-			new_record.set_prop_id(Integer.parseInt(data[PROP_ID].trim()));
-			new_record.set_base_prop_id(Integer.parseInt(data[BASE_PROP_ID].trim()));
-			new_record.set_construct_yr(Integer.parseInt(data[CONSTRUCT_YR].trim()));
-			new_record.set_refurbished_yr(Integer.parseInt(data[REFURBISHED_YR].trim()));
-			new_record.set_num_floors(Integer.parseInt(data[NUM_FLOORS].trim()));
-			new_record.set_access_rating(Integer.parseInt(data[ACCESS_RATING].trim()));
-			new_record.set_bicycle_spaces(Integer.parseInt(data[BICYCLE_SPACES].trim()));
-			new_record.set_has_showers(Integer.parseInt(data[HAS_SHOWERS].trim()));
-			new_record.set_x_coor(Float.parseFloat(data[X_COOR].trim()));
-			new_record.set_y_coor(Float.parseFloat(data[Y_COOR].trim()));
-		} catch(NumberFormatException nfe) {
-			System.err.println("Error - Record Discarded "
-		      		+ "- Record Contained Non-Numerical Value at Line: "+line_number+"! ");
-			record_failed = true;
-		}
-		if(record_failed) {
-			return null;
-		} else {
-			new_record.set_building_name(data[BUILDING_NAME]);
-			new_record.set_street_address(data[STREET_ADDRESS]);
-			new_record.set_suburb(data[SUBURB]);
-			new_record.set_space_usage(data[SPACE_USAGE]);
-			new_record.set_access_type(data[ACCESS_TYPE]);
-			new_record.set_access_desc(data[ACCESS_DESC]);
-			new_record.set_location(data[LOCATION]);
-			return new_record;
-		}
-	}
-	
 	// Method to Return a String from a Byte Buffer
 	public String byte_buffer_to_string(byte[] data, int byte_offset, int req_offset) {
 		String value = "";
 		for(int i=byte_offset; i<byte_offset+req_offset;i++) {
+			// Don't append '#' to the String
 			if((char)data[i] == '#') {
 				break;
 			} else {

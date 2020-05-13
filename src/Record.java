@@ -134,6 +134,42 @@ public class Record {
 		System.out.println();
 	}	
 
+	// Method to Return a custom Hash Value for the Record
+	@Override
+	public int hashCode() {
+		int result = 0;
+
+		// Get the Hash Value
+		int bname_hash_val = this.building_name.hashCode();
+		int sa_hash_val = this.street_address.hashCode();
+		int suburb_hash_val = this.suburb.hashCode();
+		
+		
+		// Check if any of the String Hash Codes Returned 0 or -1
+		if(bname_hash_val < 0) {
+			bname_hash_val *= -1;
+		}
+		if(sa_hash_val < 0) {
+			sa_hash_val *= -1;
+		}
+		if(suburb_hash_val < 0) {
+			suburb_hash_val *= -1;
+		}
+
+		// Store the Result and Check for Limits (Adds a bit of Randomness)
+		if(bname_hash_val != 0 && sa_hash_val != 0) {
+			result = ((this.base_prop_id-this.census_yr)*suburb_hash_val)+(this.block_id*this.census_yr*bname_hash_val)-sa_hash_val;
+		} else if(bname_hash_val != 0 && sa_hash_val == 0) {
+			result = ((this.base_prop_id-this.census_yr)*suburb_hash_val)+((this.block_id*this.census_yr) % bname_hash_val);
+		} else if(bname_hash_val == 0 && sa_hash_val != 0) {
+			result = ((this.base_prop_id-this.census_yr)*suburb_hash_val)+((this.block_id*this.census_yr) % sa_hash_val);
+		} else {
+			result = ((this.base_prop_id-this.census_yr)*suburb_hash_val)+(this.block_id*this.census_yr);
+		}
+		
+		// Get Correct Positive Value
+		return (result < 0) ? result*-1 : result;
+	}
 	
 	// Method for Searching for a String in the Record
 	public boolean contains(String sc) {
