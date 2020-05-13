@@ -11,7 +11,7 @@ public class HMethods {
 	// -------------------------- Final Constants -------------------------- //
 		// --------------- Input Validation Flag Checks ---------------- //
 	public static final int PAGE_SIZE_ARGUEMENT = 0;
-	public static final int HEAP_FILE_ARGUMENT = 1;
+	public static final int HEAP_FILE_ARGUEMENT = 1;
 	
 		// ------------------- Fields in Flat File --------------------- //
 	public static final int CENSUS_YR = 0;
@@ -54,7 +54,7 @@ public class HMethods {
 		      Integer.parseInt(args[PAGE_SIZE_ARGUEMENT].trim());
 		      
 		      // Step 3: check that the Heap File has the same Page Size (.4096)
-		      if(!args[HEAP_FILE_ARGUMENT].equals("heap."+args[PAGE_SIZE_ARGUEMENT].trim())) {
+		      if(!args[HEAP_FILE_ARGUEMENT].equals("heap."+args[PAGE_SIZE_ARGUEMENT].trim())) {
 		    	  System.err.println("Error - The Page Sizes Do Not Match!");
 		    	  override = true;
 		      }
@@ -77,6 +77,11 @@ public class HMethods {
 	public int page_size(String[] args) {
 		return Integer.parseInt(args[PAGE_SIZE_ARGUEMENT].trim());
 	}
+	// Method to extract the Heap File name
+	public String heap_file(String[] args) {
+		return args[HEAP_FILE_ARGUEMENT];
+	}
+	
 	
 	// Method to Print out Contents of HashMap
 	public void print_hash_map(HashMap<String, Record> data) {
@@ -145,7 +150,11 @@ public class HMethods {
 	public String byte_buffer_to_string(byte[] data, int byte_offset, int req_offset) {
 		String value = "";
 		for(int i=byte_offset; i<byte_offset+req_offset;i++) {
-			value+=(char)data[i];
+			if((char)data[i] == '#') {
+				break;
+			} else {
+				value+=(char)data[i];
+			}
 		}
 		return value;	
 	}
