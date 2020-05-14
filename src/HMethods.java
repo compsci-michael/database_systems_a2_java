@@ -40,7 +40,7 @@ public class HMethods {
 	private static final int PRIME_TWO = 34723753;
 	private static final int PRIME_THREE = 376307;
 		// -------------- Suitable Size for 70% Occupancy -------------- //
-	private static final int HASH_TABLE_SIZE = 300000;
+	private static final int HASH_TABLE_SIZE = 200000;
 	
 	
 	// Method to return Hashvalue of Record
@@ -48,7 +48,7 @@ public class HMethods {
 		//int key = string_to_hash(hash);
 		int key = string_to_hash(hash);
 		// Lecture 6 for Source of Hashing Function
-		int result = ((PRIME_ONE*key + PRIME_TWO) % PRIME_THREE) + census_year % HASH_TABLE_SIZE;
+		int result = (((PRIME_ONE*key + PRIME_TWO) % PRIME_THREE) + census_year) % HASH_TABLE_SIZE;
 		// Get Correct Positive Value 
 		return (result < 0) ? result*-1 : result;
 	}
