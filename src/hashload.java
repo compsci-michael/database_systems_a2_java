@@ -74,19 +74,20 @@ public class hashload {
 				// Go through the File and grab the page_size amount of Bytes
 				while (heap_file_reader.read(read_page) != -1) {
 					int ptr_move_to_prop_id = (2*INT_SIZE);
-					int ptr_move_to_street_address = (2*INT_SIZE)+BUILDING_NAME_SIZE;
+					//int ptr_move_to_street_address = (2*INT_SIZE)+BUILDING_NAME_SIZE;
+					int ptr_move_to_street_address = (4*INT_SIZE)+BUILDING_NAME_SIZE;
 					while((char)read_page[byte_count] != '#') {
 						// Get the Census Year
 						int census_year = ByteBuffer.wrap(read_page, byte_count, INT_SIZE).getInt();
-						
+						/*
 						// Move the Pointer to the Property ID
 						byte_count+=ptr_move_to_prop_id;
 						
 						// Get the Property ID
 						int prop_id = ByteBuffer.wrap(read_page, byte_count, INT_SIZE).getInt();
-						
+						*/
 						// Move the Pointer to the Street Address
-						byte_count+=(2*INT_SIZE)+BUILDING_NAME_SIZE;
+						byte_count+=ptr_move_to_street_address;
 						
 						// Read the Street Address into a Variable
 						String street_address = hm.byte_buffer_to_string(read_page, byte_count, STREET_ADDRESS_SIZE);
@@ -95,8 +96,12 @@ public class hashload {
 						byte_count+=(RECORD_SIZE-ptr_move_to_street_address);
 						
 						//System.out.println(street_address.toLowerCase().hashCode());
-						System.out.println(census_year + " " + prop_id + " " + street_address + " ");
-								
+						//System.out.println(census_year + " " + prop_id + " " + street_address + " ");
+						//System.out.println(census_year + " " + street_address);
+						//int hash = (street_address.hashCode() < 0) ? street_address.hashCode()*-1 : street_address.hashCode();
+						
+						System.out.println(hm.record_to_hash(street_address, census_year));
+						//System.out.println(hm.string_to_hash(street_address));
 						// Keeps Track of Page-Record File Offset
 						total_file_offset+=RECORD_SIZE;
 					}

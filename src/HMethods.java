@@ -1,3 +1,5 @@
+import java.math.BigInteger;
+
 ///////////////////////////////////////////////////////////////////////////////
 // File Written by: Michael A (s3662507) (Last Edit: 13/05/2020)
 // Database Systems - Assignment 02
@@ -40,14 +42,55 @@ public class HMethods {
 		// -------------- Suitable Size for 70% Occupancy -------------- //
 	private static final int HASH_TABLE_SIZE = 300000;
 	
-	/*
+	
 	// Method to return Hashvalue of Record
-	public int record_to_hash(Record record) {
-		int key = record.hashCode();
+	public int record_to_hash(String hash, int census_year) {
+		//int key = string_to_hash(hash);
+		int key = string_to_hash(hash);
 		// Lecture 6 for Source of Hashing Function
-		int result = ((PRIME_ONE*key + PRIME_TWO) % PRIME_THREE) % HASH_TABLE_SIZE;
+		int result = ((PRIME_ONE*key + PRIME_TWO) % PRIME_THREE) + census_year % HASH_TABLE_SIZE;
 		// Get Correct Positive Value 
 		return (result < 0) ? result*-1 : result;
+	}
+	
+	// Sourced and Adapated from: 
+	// https://stackoverflow.com/questions/37580741/seemingly-easy-fnv1-hashing
+	//-implementation-results-in-a-lot-of-collisions
+	public int string_to_hash(String s) {
+        final BigInteger FNV_offset_basis = new BigInteger("14695981039346656037");
+        final BigInteger FNV_prime = new BigInteger("1099511628211");
+
+        BigInteger hash = new BigInteger(FNV_offset_basis.toString());
+
+        for (int i = 0; i < s.length(); i++) {
+            int charValue = s.charAt(i);
+
+            hash = hash.multiply(FNV_prime);
+            hash = hash.xor(BigInteger.valueOf((int) charValue & 0xffff));
+        }
+
+        return hash.intValue();
+    }
+	
+	/*
+	// adapted from String.hashCode()
+	public long string_to_hash(String string) {
+	  long h = 1125899906842597L; // prime
+	  int len = string.length();
+
+	  for (int i = 0; i < len; i++) {
+	    h = 31*h + string.charAt(i);
+	  }
+	  return h;
+	}
+	*/
+	/*
+	public int string_to_hash(String hash) {
+		int result = 0;
+		for(int i=0; i<hash.length(); i++) {
+			result+=(int)hash.charAt(i);
+		}
+		return result;
 	}
 	*/
 	
