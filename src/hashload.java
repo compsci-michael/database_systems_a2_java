@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.HashMap;
 
 ///////////////////////////////////////////////////////////////////////////////
 // File Written by: Michael A (s3662507) (Last Edit: 13/05/2020)
@@ -74,63 +73,32 @@ public class hashload {
 
 				// Go through the File and grab the page_size amount of Bytes
 				while (heap_file_reader.read(read_page) != -1) {
+					int ptr_move_to_prop_id = (2*INT_SIZE);
+					int ptr_move_to_street_address = (2*INT_SIZE)+BUILDING_NAME_SIZE;
 					while((char)read_page[byte_count] != '#') {
-						// Make a New Record which is being Read in
-						Record new_record = new Record();
+						// Get the Census Year
+						int census_year = ByteBuffer.wrap(read_page, byte_count, INT_SIZE).getInt();
 						
-						// Go Through the r_page, block chunks at a time and set the Record members
-						new_record.set_census_yr(ByteBuffer.wrap(read_page,byte_count,INT_SIZE).getInt());
-						byte_count+=INT_SIZE;
-						new_record.set_block_id(ByteBuffer.wrap(read_page,byte_count,INT_SIZE).getInt());
-						byte_count+=INT_SIZE;
-						new_record.set_prop_id(ByteBuffer.wrap(read_page,byte_count,INT_SIZE).getInt());
-						byte_count+=INT_SIZE;
-						new_record.set_base_prop_id(ByteBuffer.wrap(read_page,byte_count,INT_SIZE).getInt());
-						byte_count+=INT_SIZE;
-						new_record.set_building_name(hm.byte_buffer_to_string(read_page, byte_count, BUILDING_NAME_SIZE));
-						byte_count+=BUILDING_NAME_SIZE;
-						new_record.set_street_address(hm.byte_buffer_to_string(read_page, byte_count, STREET_ADDRESS_SIZE));
-						byte_count+=STREET_ADDRESS_SIZE;
-						new_record.set_suburb(hm.byte_buffer_to_string(read_page, byte_count, SUBURB_SIZE));
-						byte_count+=SUBURB_SIZE;
-						new_record.set_construct_yr(ByteBuffer.wrap(read_page,byte_count,INT_SIZE).getInt());
-						byte_count+=INT_SIZE;
-						new_record.set_refurbished_yr(ByteBuffer.wrap(read_page,byte_count,INT_SIZE).getInt());
-						byte_count+=INT_SIZE;
-						new_record.set_num_floors(ByteBuffer.wrap(read_page,byte_count,INT_SIZE).getInt());
-						byte_count+=INT_SIZE;
-						new_record.set_space_usage(hm.byte_buffer_to_string(read_page, byte_count, SPACE_USAGE_SIZE));
-						byte_count+=SPACE_USAGE_SIZE;
-						new_record.set_access_type(hm.byte_buffer_to_string(read_page, byte_count, ACCESS_TYPE_SIZE));
-						byte_count+=ACCESS_TYPE_SIZE;
-						new_record.set_access_desc(hm.byte_buffer_to_string(read_page, byte_count, ACCESS_DESC_SIZE));
-						byte_count+=ACCESS_DESC_SIZE;
-						new_record.set_access_rating(ByteBuffer.wrap(read_page,byte_count,INT_SIZE).getInt());
-						byte_count+=INT_SIZE;
-						new_record.set_bicycle_spaces(ByteBuffer.wrap(read_page,byte_count,INT_SIZE).getInt());
-						byte_count+=INT_SIZE;
-						new_record.set_has_showers(ByteBuffer.wrap(read_page,byte_count,INT_SIZE).getInt());
-						byte_count+=INT_SIZE;
-						new_record.set_x_coor(ByteBuffer.wrap(read_page,byte_count,DOUBLE_SIZE).getDouble());
-						byte_count+=DOUBLE_SIZE;
-						new_record.set_y_coor(ByteBuffer.wrap(read_page,byte_count,DOUBLE_SIZE).getDouble());
-						byte_count+=DOUBLE_SIZE;
-						new_record.set_location(hm.byte_buffer_to_string(read_page, byte_count, LOCATION_SIZE));
-						byte_count+=LOCATION_SIZE;
+						// Move the Pointer to the Property ID
+						byte_count+=ptr_move_to_prop_id;
 						
+						// Get the Property ID
+						int prop_id = ByteBuffer.wrap(read_page, byte_count, INT_SIZE).getInt();
+						
+						// Move the Pointer to the Street Address
+						byte_count+=(2*INT_SIZE)+BUILDING_NAME_SIZE;
+						
+						// Read the Street Address into a Variable
+						String street_address = hm.byte_buffer_to_string(read_page, byte_count, STREET_ADDRESS_SIZE);
+						
+						// Move the Pointer to the End of the Record
+						byte_count+=(RECORD_SIZE-ptr_move_to_street_address);
+						
+						//System.out.println(street_address.toLowerCase().hashCode());
+						System.out.println(census_year + " " + prop_id + " " + street_address + " ");
+								
 						// Keeps Track of Page-Record File Offset
 						total_file_offset+=RECORD_SIZE;
-						// Test Record Read
-						//new_record.record_display_simple();
-						//System.out.println(total_file_offset);
-						//System.out.println(hm.record_to_hash(new_record));
-						hm.record_to_hash(new_record);
-						
-						// Linux Commands for Testing Occupancy
-						// java hashload 4096 heap.4096 > log.txt
-						// sort log.txt | uniq -d > log_uniq.txt
-						
-						//System.out.println(new_record.hashCode());
 					}
 					
 					// Reset the Buffer
@@ -141,7 +109,7 @@ public class hashload {
 					page_number++;
 					// Keeps Track of Page File Offset
 					total_file_offset = page_number*page_size;
-					if(page_number == 10) break;
+					//if(page_number == 1) break;
 					
 				}
 				final long hash_calc_end_time = System.nanoTime();

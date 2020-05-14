@@ -5,7 +5,6 @@
 // This Class is used to hold useful functionalities that can be called upon
 // in the main method
 ///////////////////////////////////////////////////////////////////////////////
-import java.util.HashMap;
 
 public class HMethods {
 	// -------------------------- Final Constants -------------------------- //
@@ -41,6 +40,7 @@ public class HMethods {
 		// -------------- Suitable Size for 70% Occupancy -------------- //
 	private static final int HASH_TABLE_SIZE = 300000;
 	
+	/*
 	// Method to return Hashvalue of Record
 	public int record_to_hash(Record record) {
 		int key = record.hashCode();
@@ -49,6 +49,7 @@ public class HMethods {
 		// Get Correct Positive Value 
 		return (result < 0) ? result*-1 : result;
 	}
+	*/
 	
 	// Method to Validate the Input Arguements for hashload
 	public boolean input_validation_hashload(String[] args) {
@@ -93,13 +94,14 @@ public class HMethods {
 		return args[HEAP_FILE_ARGUEMENT];
 	}
 	
-	
+	/*
 	// Method to Print out Contents of HashMap
 	public void print_hash_map(HashMap<String, Record> data) {
 		for (String key : data.keySet()) {
 			data.get(key).record_display();
 		}
 	}
+	*/
 	
 	// Method to Fill a Character Array full of # and Insert the String
 	public String char_fill(String s, int size) {
