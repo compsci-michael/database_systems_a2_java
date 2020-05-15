@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.SortedSet;
 
 ///////////////////////////////////////////////////////////////////////////////
-// File Written by: Michael A (s3662507) (Last Edit: 13/05/2020)
+// File Written by: Michael A (s3662507) (Last Edit: 15/05/2020)
 // Database Systems - Assignment 02
 // Purpose of this Class:
 // This Class is used to hold useful functionalities that can be called upon
@@ -16,6 +16,25 @@ import java.util.SortedSet;
 
 public class HMethods {
 	// -------------------------- Final Constants -------------------------- //
+	public static final int INT_SIZE = 4;
+	public static final int DOUBLE_SIZE = 8;
+	public static final int BUILDING_NAME_SIZE = 63;
+	public static final int STREET_ADDRESS_SIZE = 34;
+	public static final int SUBURB_SIZE = 28;
+	public static final int SPACE_USAGE_SIZE = 39;
+	public static final int ACCESS_TYPE_SIZE = 32;
+	public static final int ACCESS_DESC_SIZE = 81;
+	public static final int LOCATION_SIZE = 27;
+	public static final int PTR_TO_STREET_ADDRESS = (4*INT_SIZE)+BUILDING_NAME_SIZE;
+	public static final int RECORD_SIZE = 
+			10*INT_SIZE+2*DOUBLE_SIZE
+			+BUILDING_NAME_SIZE
+			+STREET_ADDRESS_SIZE
+			+SUBURB_SIZE
+			+SPACE_USAGE_SIZE
+			+ACCESS_TYPE_SIZE
+			+ACCESS_DESC_SIZE
+			+LOCATION_SIZE;
 		// --------------- Input Validation Flag Checks ---------------- //
 	public static final int PAGE_SIZE_ARGUEMENT = 0;
 	public static final int STATISTICS_ARGUEMENT = 1;

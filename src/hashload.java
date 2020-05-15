@@ -12,34 +12,13 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 ///////////////////////////////////////////////////////////////////////////////
-// File Written by: Michael A (s3662507) (Last Edit: 13/05/2020)
+// File Written by: Michael A (s3662507) (Last Edit: 15/05/2020)
 // Database Systems - Assignment 02
 // Purpose of this Class:
 // This is the Driver Class which contains the Main method for loading the
 // java heap file and creating a Hashfile
 ///////////////////////////////////////////////////////////////////////////////
 public class hashload {
-	// -------------------------- Final Constants -------------------------- //
-	private static final int INT_SIZE = 4;
-	private static final int DOUBLE_SIZE = 8;
-	private static final int BUILDING_NAME_SIZE = 63;
-	private static final int STREET_ADDRESS_SIZE = 34;
-	private static final int SUBURB_SIZE = 28;
-	private static final int SPACE_USAGE_SIZE = 39;
-	private static final int ACCESS_TYPE_SIZE = 32;
-	private static final int ACCESS_DESC_SIZE = 81;
-	private static final int LOCATION_SIZE = 27;
-	private static final int PTR_TO_STREET_ADDRESS = (4*INT_SIZE)+BUILDING_NAME_SIZE;
-	private static final int RECORD_SIZE = 
-			10*INT_SIZE+2*DOUBLE_SIZE
-			+BUILDING_NAME_SIZE
-			+STREET_ADDRESS_SIZE
-			+SUBURB_SIZE
-			+SPACE_USAGE_SIZE
-			+ACCESS_TYPE_SIZE
-			+ACCESS_DESC_SIZE
-			+LOCATION_SIZE;
-	
 	// Must be able to execute the following: java dbload -p pagesize datafile
 	public static void main(String[] args) {
 		final long full_start_time = System.nanoTime();
@@ -99,16 +78,16 @@ public class hashload {
 						int vacant_spot_ptr = 0;
 
 						// Get the Census Year
-						int census_year = ByteBuffer.wrap(read_page, byte_count, INT_SIZE).getInt();
+						int census_year = ByteBuffer.wrap(read_page, byte_count, HMethods.INT_SIZE).getInt();
 
 						// Move the Pointer to the Street Address
-						byte_count+=PTR_TO_STREET_ADDRESS;
+						byte_count+=HMethods.PTR_TO_STREET_ADDRESS;
 						
 						// Read the Street Address into a Variable
-						String street_address = hm.byte_buffer_to_string(read_page, byte_count, STREET_ADDRESS_SIZE);
+						String street_address = hm.byte_buffer_to_string(read_page, byte_count, HMethods.STREET_ADDRESS_SIZE);
 						
 						// Move the Pointer to the End of the Record
-						byte_count+=(RECORD_SIZE-PTR_TO_STREET_ADDRESS);
+						byte_count+=(HMethods.RECORD_SIZE-HMethods.PTR_TO_STREET_ADDRESS);
 						
 						// Get the Hash Value of the Record
 						int hash_value = hm.record_to_hash(street_address, census_year);
@@ -185,7 +164,7 @@ public class hashload {
 				        hash_file_data.put(vacant_spot_ptr, file_offset_pointers);
 				        
 						// Keeps Track of Page-Record File Offset
-						total_file_offset+=RECORD_SIZE;
+						total_file_offset+=HMethods.RECORD_SIZE;
 						number_of_records_read++;
 					}
 					
