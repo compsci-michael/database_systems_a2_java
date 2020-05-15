@@ -36,9 +36,13 @@ public class HMethods {
 			+ACCESS_DESC_SIZE
 			+LOCATION_SIZE;
 		// --------------- Input Validation Flag Checks ---------------- //
-	public static final int PAGE_SIZE_ARGUEMENT = 0;
+	public static final int PAGE_SIZE_ARGUEMENT_LOAD = 0;
 	public static final int STATISTICS_ARGUEMENT = 1;
 	
+	public static final int CENSUS_YEAR_ARGUEMENT_QUERY = 0;
+	public static final int STREET_ADDRESS_ARGUEMENT_QUERY = 1;
+	public static final int PAGE_SIZE_ARGUEMENT_QUERY = 2;
+
 		// ------------------- Fields in Flat File --------------------- //
 	public static final int CENSUS_YR = 0;
 	public static final int BLOCK_ID = 1;
@@ -68,10 +72,99 @@ public class HMethods {
 	public static final int HASH_TABLE_SIZE = 200000;
 	public static final int BUCKET_SIZE_USED = 2;
 	
+	// Method to Validate the Input Arguements for hashload
+	public boolean input_validation_hashload(String[] args) {
+		boolean is_correct = false;
+		boolean override = false;
+		// Step 1: Check if number of Arguements is Correct
+		if(args.length < 1 || args.length > 2) {
+			System.err.println("Error - Incorrect Number of Arguements!");
+			System.err.println("Format must be of the following:\njava hashload <pagesize>\nor");
+			System.err.println("java hashload <pagesize> true (if statistics is required)");
+		} else {
+			// Step 2: Validate Input
+			// Check if the pagesize was a number
+			try {
+				Integer.parseInt(args[PAGE_SIZE_ARGUEMENT_LOAD].trim());
+		      
+				// if Statics was Enabled, Check for "true" case
+				if(args.length == 2) {
+					if(!args[STATISTICS_ARGUEMENT].equals("true")) {
+						System.err.println("Error - To Enable Statistics, enter true after <pagesize>!");
+						System.err.println("java hashload <pagesize> true");
+						override = true;
+					}
+				}
+		    } catch (NumberFormatException nfe) {
+		    	System.err.println("Error - That wasn't a Number!");
+		    	override = true;
+		    }
+			if(!override) {
+				is_correct = true;
+			} else {
+				System.err.println("Please try again!\n");
+			}
+		}
+		// Step 3: Return Value
+		return is_correct;	
+	}
+	
+	// Method to Validate the Input Arguements for hashquery
+	public boolean input_validation_hashquery(String[] args) {
+		boolean is_correct = false;
+		boolean override = false;
+		// Step 1: Check if number of Arguements is Correct
+		if(args.length < 3 || args.length > 3) {
+			System.err.println("Error - Incorrect Number of Arguements!");
+			System.err.println("Format must be of the following:\njava hashquery <census year> <street address> <pagesize>");
+		} else {
+			// Step 2: Validate Input
+			try {
+				// Check that the pagesize arguement is a number
+				Integer.parseInt(args[PAGE_SIZE_ARGUEMENT_QUERY].trim());
+				// Check the the census year arguement is a Number 
+				Integer.parseInt(args[CENSUS_YEAR_ARGUEMENT_QUERY].trim());
+		    } catch (NumberFormatException nfe) {
+		    	System.err.println("Error - That wasn't a Number!");
+		    	override = true;
+		    }
+			if(!override) {
+				is_correct = true;
+			} else {
+				System.err.println("Please try again!\n");
+			}
+		}
+		// Step 3: Return Value
+		return is_correct;	
+	}
+	
+	
+	// Method to extract the Page Size
+	public int page_size_load(String[] args) {
+		return Integer.parseInt(args[PAGE_SIZE_ARGUEMENT_LOAD].trim());
+	}
+	// Method to Return True if Valid Input for Statistics
+	public boolean does_require_statistics(String[] args) {
+		return args.length == 2 ? true : false;
+	}
+	
+	// Method to extract the Page Size
+	public int page_size_query(String[] args) {
+		return Integer.parseInt(args[PAGE_SIZE_ARGUEMENT_QUERY].trim());
+	}
+	// Method to extract the Census Year
+	public int census_year_query(String[] args) {
+		return Integer.parseInt(args[CENSUS_YEAR_ARGUEMENT_QUERY].trim());
+	}
+	// Method to extract the Street Address
+	public String street_address_query(String[] args) {
+		return args[CENSUS_YEAR_ARGUEMENT_QUERY];
+	}
+	
 	
 	// Method to return Hashvalue of Record
-	public int record_to_hash(String hash, int census_year) {
-		int key = string_to_hash(hash);
+	public int record_to_hash(String street_address, int census_year) {
+		int key = string_to_hash(street_address.toLowerCase());
 		// Lecture 6 for Source of Hashing Function
 		int result = (((PRIME_ONE*key + PRIME_TWO) % PRIME_THREE) + census_year) % HASH_TABLE_SIZE;
 		// Get Correct Positive Value 
@@ -96,53 +189,6 @@ public class HMethods {
 
         return hash.intValue();
     }
-	
-	// Method to Validate the Input Arguements for hashload
-	public boolean input_validation_hashload(String[] args) {
-		boolean is_correct = false;
-		boolean override = false;
-		// Step 1: Check if number of Arguements is Correct
-		if(args.length < 1 || args.length > 2) {
-			System.err.println("Error - Incorrect Number of Arguements!");
-			System.err.println("Format must be of the following:\njava hashload <pagesize>\nor");
-			System.err.println("java hashload <pagesize> true (if statistics is required)");
-		} else {
-			// Step 2: Validate Input
-			// Check if the pagesize was a number
-			try {
-				Integer.parseInt(args[PAGE_SIZE_ARGUEMENT].trim());
-		      
-				// if Statics was Enabled, Check for "true" case
-				if(args.length == 2) {
-					if(!args[STATISTICS_ARGUEMENT].equals("true")) {
-						System.err.println("Error - To Enable Statistics, enter true after <pagesize>!");
-						System.err.println("java hashload <pagesize> true");
-						override = true;
-					}
-				}
-		    } catch (NumberFormatException nfe) {
-		    	System.err.println("Error - That wasn't a Number!");
-		    	override = true;
-		    }
-			if(!override) {
-				is_correct = true;
-			} else {
-				System.err.println("Please try again!\n");
-			}
-		}
-		// Step 3: Return Value
-		return is_correct;	
-	}
-	
-	
-	// Method to extract the Page Size
-	public int page_size(String[] args) {
-		return Integer.parseInt(args[PAGE_SIZE_ARGUEMENT].trim());
-	}
-	// Method to Return True if Valid Input for Statistics
-	public boolean does_require_statistics(String[] args) {
-		return args.length == 2 ? true : false;
-	}
 	
 	// Method to Count the Total in the Duplicates Counted Column
 	public int count_total_duplicate_keys(Map<Integer, Integer> dup_map) {
@@ -253,7 +299,7 @@ public class HMethods {
     }
 	
 	// Method to Write the Hash File Data to a Hash File 
-	public void write_hash_file(Map<Integer, List<Integer>> hash_file_data, int page_size) {
+	public void write_hash_file(Map<Integer, List<String>> hash_file_data, int page_size) {
         // Prepare Writing to File
 		final long full_start_time = System.nanoTime();
 		PrintWriter hash_file = null;
@@ -266,10 +312,10 @@ public class HMethods {
         	for(int i=0; i<HASH_TABLE_SIZE; i++) {
     			// if the Hash File has the Key, Write out its key, file_offset
     			if(hash_file_data.containsKey(i)) {
-    				List<Integer> file_offset_pointers = hash_file_data.get(i);
-    				int file_offset_size = file_offset_pointers.size(); 
+    				List<String> hash_and_file_offset_pointers = hash_file_data.get(i);
+    				int file_offset_size = hash_and_file_offset_pointers.size(); 
     				for(int j=0; j<file_offset_size; j++) {
-    					hash_file.write(i+","+file_offset_pointers.get(j)+"\n");	
+    					hash_file.write(hash_and_file_offset_pointers.get(j)+"\n");	
     				}
     				
     				if(file_offset_size != BUCKET_SIZE_USED) {

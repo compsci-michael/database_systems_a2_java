@@ -31,7 +31,7 @@ public class hashload {
 		boolean correct_input = hm.input_validation_hashload(args);
 		if(correct_input) {
 			// Stores the Page Size
-			page_size = hm.page_size(args);
+			page_size = hm.page_size_load(args);
 			// Stores the filename "heap.<page_size>"
 			String heap_file_name = "heap."+page_size;
 			// if the User Requires Statistics to be Exported
@@ -49,7 +49,7 @@ public class hashload {
 			// Used for Initial Unique and Initial Available Keys
 	        SortedSet<Integer> initial_unique_keys = new TreeSet<>(); 
 			// Used to hold the Actual Hash File Data
-	        Map<Integer, List<Integer>> hash_file_data = new TreeMap<Integer, List<Integer>>();
+	        Map<Integer, List<String>> hash_file_data = new TreeMap<Integer, List<String>>();
 			
 			// Step 2: Reading in the Input from the File
 			FileInputStream heap_file = null;
@@ -101,7 +101,7 @@ public class hashload {
 							} else {
 								// if the Key is Not Unique, Add it to Duplicates
 								if(initial_unique_keys.contains(hash_value)) {
-									duplicate_keys.put(hash_value, 1);
+									duplicate_keys.put(hash_value, 2);
 								} else {
 									// Else Add it to the Unique Keys
 									initial_unique_keys.add(hash_value);
@@ -111,9 +111,10 @@ public class hashload {
 						
 						// Store the Heap File Data
 						// Step 2.1: Check if Key is being Used
-						List<Integer> file_offset_pointers = new ArrayList<>();
-						if(hash_file_data.containsKey(hash_value)) {
-							// Step 2.2: Check if the Number of Stored Pointers is equal to BUCKET_SIZE_USED							
+						List<String> hash_and_file_offset_pointers = new ArrayList<String>();
+
+				        if(hash_file_data.containsKey(hash_value)) {
+							// Step 2.2: Check if the Number of Stored Pointers is equal to BUCKET_SIZE_USED
 							if(hash_file_data.get(hash_value).size() == HMethods.BUCKET_SIZE_USED) {
 								counted_num_of_collisions++;
 								// Find Vacant Spot using Linear Probing
@@ -155,13 +156,13 @@ public class hashload {
 						
 						// if the Bucket contains data, save and add
 						if(hash_file_data.containsKey(vacant_spot_ptr)) {
-							file_offset_pointers = hash_file_data.get(vacant_spot_ptr);
+							hash_and_file_offset_pointers = hash_file_data.get(vacant_spot_ptr);
 						}
-						// Add the new File Offset
-						file_offset_pointers.add(total_file_offset);
-
+						// Add the new File Offset with Hash Value
+						hash_and_file_offset_pointers.add(hash_value+","+total_file_offset);
+						
 						// Save Value and Move
-				        hash_file_data.put(vacant_spot_ptr, file_offset_pointers);
+				        hash_file_data.put(vacant_spot_ptr, hash_and_file_offset_pointers);
 				        
 						// Keeps Track of Page-Record File Offset
 						total_file_offset+=HMethods.RECORD_SIZE;
