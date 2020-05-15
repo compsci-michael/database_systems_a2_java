@@ -1,4 +1,9 @@
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.math.BigInteger;
+import java.util.Map;
+import java.util.SortedSet;
 
 ///////////////////////////////////////////////////////////////////////////////
 // File Written by: Michael A (s3662507) (Last Edit: 13/05/2020)
@@ -12,7 +17,7 @@ public class HMethods {
 	// -------------------------- Final Constants -------------------------- //
 		// --------------- Input Validation Flag Checks ---------------- //
 	public static final int PAGE_SIZE_ARGUEMENT = 0;
-	public static final int HEAP_FILE_ARGUEMENT = 1;
+	public static final int STATISTICS_ARGUEMENT = 1;
 	
 		// ------------------- Fields in Flat File --------------------- //
 	public static final int CENSUS_YR = 0;
@@ -40,7 +45,8 @@ public class HMethods {
 	private static final int PRIME_TWO = 34723753;
 	private static final int PRIME_THREE = 376307;
 		// -------------- Suitable Size for 70% Occupancy -------------- //
-	private static final int HASH_TABLE_SIZE = 200000;
+	public static final int HASH_TABLE_SIZE = 200000;
+	public static final int BUCKET_SIZE_USED = 2;
 	
 	
 	// Method to return Hashvalue of Record
@@ -72,50 +78,32 @@ public class HMethods {
         return hash.intValue();
     }
 	
-	/*
-	// adapted from String.hashCode()
-	public long string_to_hash(String string) {
-	  long h = 1125899906842597L; // prime
-	  int len = string.length();
-
-	  for (int i = 0; i < len; i++) {
-	    h = 31*h + string.charAt(i);
-	  }
-	  return h;
-	}
-	*/
-	/*
-	public int string_to_hash(String hash) {
-		int result = 0;
-		for(int i=0; i<hash.length(); i++) {
-			result+=(int)hash.charAt(i);
-		}
-		return result;
-	}
-	*/
-	
 	// Method to Validate the Input Arguements for hashload
 	public boolean input_validation_hashload(String[] args) {
 		boolean is_correct = false;
 		boolean override = false;
 		// Step 1: Check if number of Arguements is Correct
-		if(args.length < 2 || args.length > 2) {
-			System.err.println("Error - Not Enough Arguements!");
-			System.err.println("Format must be of the following: <pagesize>\n");
+		if(args.length < 1 || args.length > 2) {
+			System.err.println("Error - Incorrect Number of Arguements!");
+			System.err.println("Format must be of the following:\njava hashload <pagesize>\nor");
+			System.err.println("java hashload <pagesize> true (if statistics is required)");
 		} else {
 			// Step 2: Validate Input
 			// Check if the pagesize was a number
 			try {
-		      Integer.parseInt(args[PAGE_SIZE_ARGUEMENT].trim());
+				Integer.parseInt(args[PAGE_SIZE_ARGUEMENT].trim());
 		      
-		      // Step 3: check that the Heap File has the same Page Size (.4096)
-		      if(!args[HEAP_FILE_ARGUEMENT].equals("heap."+args[PAGE_SIZE_ARGUEMENT].trim())) {
-		    	  System.err.println("Error - The Page Sizes Do Not Match!");
-		    	  override = true;
-		      }
+				// if Statics was Enabled, Check for "true" case
+				if(args.length == 2) {
+					if(!args[STATISTICS_ARGUEMENT].equals("true")) {
+						System.err.println("Error - To Enable Statistics, enter true after <pagesize>!");
+						System.err.println("java hashload <pagesize> true");
+						override = true;
+					}
+				}
 		    } catch (NumberFormatException nfe) {
-		      System.err.println("Error - That wasn't a Number!");
-		      override = true;
+		    	System.err.println("Error - That wasn't a Number!");
+		    	override = true;
 		    }
 			if(!override) {
 				is_correct = true;
@@ -132,19 +120,156 @@ public class HMethods {
 	public int page_size(String[] args) {
 		return Integer.parseInt(args[PAGE_SIZE_ARGUEMENT].trim());
 	}
-	// Method to extract the Heap File name
-	public String heap_file(String[] args) {
-		return args[HEAP_FILE_ARGUEMENT];
+	// Method to Return True if Valid Input for Statistics
+	public boolean does_require_statistics(String[] args) {
+		return args.length == 2 ? true : false;
 	}
 	
-	/*
-	// Method to Print out Contents of HashMap
-	public void print_hash_map(HashMap<String, Record> data) {
-		for (String key : data.keySet()) {
-			data.get(key).record_display();
-		}
+	public int count_total_duplicate_keys(Map<Integer, Integer> dup_map) {
+		 int count_total = 0;
+        // Prepare Writing to File
+		final long full_start_time = System.nanoTime();
+		
+    	// Go throug the Duplicate Map
+    	for(Map.Entry<Integer, Integer> entry : dup_map.entrySet()) {
+			// Ensure Value > Bucket Size
+			int entry_value = entry.getValue();
+			entry_value = (entry_value > BUCKET_SIZE_USED) ? entry_value-BUCKET_SIZE_USED : 0; 
+			// if Value is not 0, it was > BUCKET_SIZE_USED so Write
+			if(entry_value != 0) {
+				// This would lead to a Collision
+				count_total+=entry_value;
+			}
+        }
+	   
+		final long full_end_time = System.nanoTime();
+		// Required Outputs
+		System.out.println("System - Time Taken to Calculate Collisions: "+
+		(float)(full_end_time-full_start_time)/1000000000+" seconds");
+		
+		return count_total;
 	}
-	*/
+	
+	public int write_duplicate_map(Map<Integer, Integer> dup_map) {
+        int total_lines = 0;
+        // Prepare Writing to File
+		final long full_start_time = System.nanoTime();
+		PrintWriter output = null;
+        try {
+        	// Setup the Output Stream
+        	output = new PrintWriter(new FileWriter("log_count_of_duplicates.csv"));
+        	// Go through the Duplicate Map
+        	for(Map.Entry<Integer, Integer> entry : dup_map.entrySet()) {
+    			// Ensure Value > Bucket Size
+    			int entry_value = entry.getValue();
+    			entry_value = (entry_value > BUCKET_SIZE_USED) ? entry_value-BUCKET_SIZE_USED : 0; 
+    			// if Value is not 0, it was > BUCKET_SIZE_USED so Write
+    			if(entry_value != 0) {
+    				output.write(entry.getKey()+","+entry_value+"\n");
+    				total_lines++;
+    			}
+            }
+        	
+    		final long full_end_time = System.nanoTime();
+
+        	// Required Outputs
+    		System.out.println("System - Time Taken to Write Duplicate Map to File: "+
+    		(float)(full_end_time-full_start_time)/1000000000+" seconds");
+    		
+	    } catch (IOException e) {
+	    	System.err.println("Error - Couldn't Write to log_count_of_duplicates.csv!");
+	    } finally {
+			// Closing output stream
+			if (output != null) {
+				output.close();
+			}
+	    }
+				
+		return total_lines;
+    }
+	
+	public int write_initial_unique_and_available_set(SortedSet<Integer> set) {
+        // Prepare Writing to File
+		final long full_start_time = System.nanoTime();
+		PrintWriter output_uniq = null;
+		PrintWriter output_avail = null;
+		
+        try {
+        	// Setup the Output Streams
+        	output_uniq = new PrintWriter(new FileWriter("log_initial_unique_keys.txt"));
+        	output_avail = new PrintWriter(new FileWriter("log_initial_available_keys.txt"));
+        	
+        	// Go through the Set and Output to Write Streams
+        	for(int i=0; i<HASH_TABLE_SIZE; i++) {
+    			// if Unique Write to fn1
+    			if(set.contains(i)) {
+    				output_uniq.write(i+"\n");
+    			}
+    			// if Available Write to fn2 
+    			else {
+    				output_avail.write(i+"\n");
+    			}
+    		}
+        	final long full_end_time = System.nanoTime();
+        	
+			// Required Outputs
+			System.out.println("System - Time Taken to Write Duplicate Map to File: "+
+			(float)(full_end_time-full_start_time)/1000000000+" seconds");
+			
+	    } catch (IOException e) {
+	    	System.err.println("Error - Couldn't Write to Unique and Available Files!");
+	    } finally {
+			// Closing output streams
+			if (output_uniq != null) {
+				output_uniq.close();
+			}
+			if (output_avail != null) {
+				output_avail.close();
+			}
+	    }
+        return set.size();
+    }
+	
+	public void write_hash_file(SortedSet<Integer> set) {
+        // Prepare Writing to File
+		final long full_start_time = System.nanoTime();
+		PrintWriter output_uniq = null;
+		PrintWriter output_avail = null;
+		
+        try {
+        	// Setup the Output Streams
+        	output_uniq = new PrintWriter(new FileWriter("log_initial_unique_keys.txt"));
+        	output_avail = new PrintWriter(new FileWriter("log_initial_available_keys.txt"));
+        	
+        	// Go through the Set and Output to Write Streams
+        	for(int i=0; i<HASH_TABLE_SIZE; i++) {
+    			// if Unique Write to fn1
+    			if(set.contains(i)) {
+    				output_uniq.write(i+"\n");
+    			}
+    			// if Available Write to fn2 
+    			else {
+    				output_avail.write(i+"\n");
+    			}
+    		}
+        	final long full_end_time = System.nanoTime();
+        	
+			// Required Outputs
+			System.out.println("System - Time Taken to Write Duplicate Map to File: "+
+			(float)(full_end_time-full_start_time)/1000000000+" seconds");
+			
+	    } catch (IOException e) {
+	    	System.err.println("Error - Couldn't Write to Unique and Available Files!");
+	    } finally {
+			// Closing output streams
+			if (output_uniq != null) {
+				output_uniq.close();
+			}
+			if (output_avail != null) {
+				output_avail.close();
+			}
+	    }
+    }
 	
 	// Method to Fill a Character Array full of # and Insert the String
 	public String char_fill(String s, int size) {
