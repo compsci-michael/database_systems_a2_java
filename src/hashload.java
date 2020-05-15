@@ -184,8 +184,6 @@ public class hashload {
 						// Save Value and Move
 				        hash_file_data.put(vacant_spot_ptr, file_offset_pointers);
 				        
-				        //System.out.println(hash_value+","+vacant_spot_ptr);
-				        
 						// Keeps Track of Page-Record File Offset
 						total_file_offset+=RECORD_SIZE;
 						number_of_records_read++;
@@ -198,7 +196,7 @@ public class hashload {
 					// Increment Page Counter
 					number_of_pages_read++;
 					// Keeps Track of Page File Offset
-					total_file_offset = number_of_pages_read*page_size;					
+					total_file_offset = number_of_pages_read*page_size;		
 				}
 				
 				// ------------------ Statistics Cleanup ------------------ // 
@@ -214,25 +212,23 @@ public class hashload {
 					duplicate_keys.clear();
 				}
 				
-				
 				final long hash_calc_end_time = System.nanoTime();
-
 				final long full_end_time = System.nanoTime();
 				
-				// Required Outputs
-				System.out.println("System - Time Taken to Execute Script: "+
-				(float)(full_end_time-full_start_time)/1000000000+" seconds");
-				
+				// Required Outputs				
 				System.out.println("System - Time Taken to Read the Heap File and Calculate For Hash File: "+ 
 				(float)(hash_calc_end_time-hash_calc_start_time)/1000000000+" seconds");
-				/*
-				System.out.println("System - Time Taken to Write a Hash File: "+ 
-				(float)(hash_write_end_time-hash_write_start_time)/1000000000+" seconds");
-				*/
+				
+				// Write the Hash File
+				hm.write_hash_file(hash_file_data, page_size);
+
+				System.out.println("System - Time Taken to Execute Script: "+
+				(float)(full_end_time-full_start_time)/1000000000+" seconds");
 
 				// ----------------- Statistics Reporting ------------------ // 
 				if(requires_statistics) {
 					int num_of_initial_available_keys = HMethods.HASH_TABLE_SIZE-num_of_initial_unique_keys;
+					float occupancy = (float) (((float)hash_file_data.size()/(float)HMethods.HASH_TABLE_SIZE)*100.00);
 					System.out.println("|----------------------------- Read ------------------------------|");
 					System.out.printf("|%-35s%-30s|\n", "Number of Pages Read:", number_of_pages_read);
 					System.out.printf("|%-35s%-30s|\n", "Number of Records Read:", number_of_records_read);
@@ -241,7 +237,7 @@ public class hashload {
 					System.out.printf("|%-35s%-30s|\n", "Bucket Size Used:", HMethods.BUCKET_SIZE_USED);
 					System.out.println("|----------------- Initial Hash Table Attributes -----------------|");
 					System.out.printf("|%-35s%-30s|\n", "Count of Duplicate Keys (-Bucket):", num_of_duplicate_keys);
-					System.out.printf("|%-35s%-30s|\n", "Total Count of Duplicate Keys:", count_of_duplicate_keys);
+					System.out.printf("|%-35s%-30s|\n", "Total Count of Duplicates:", count_of_duplicate_keys);
 					System.out.printf("|%-35s%-30s|\n", "Count of Initial Unique Keys:", num_of_initial_unique_keys);
 					System.out.printf("|%-35s%-30s|\n", "Count of Initial Available Keys:", num_of_initial_available_keys);
 					System.out.println("|--------------------------- Hash Table --------------------------|");	
@@ -250,7 +246,9 @@ public class hashload {
 					
 					System.out.printf("|%-35s%-30s|\n", "Number of Available Keys:", HMethods.HASH_TABLE_SIZE-hash_file_data.size());
 					System.out.printf("|%-35s%-30s|\n", "Number of Linear Probing Done:", counted_num_of_collisions);
-					System.out.printf("|%-35s%05.2f%-25%|\n", "Occupancy:", ((float)hash_file_data.size()/(float)HMethods.HASH_TABLE_SIZE)*100.00);
+					System.out.printf("|%-35s%05.2f%%                        |\n", "Occupancy:", occupancy);
+					System.out.println("|-----------------------------------------------------------------|");	
+
 				}
 			} 
 			// Catching IOException error

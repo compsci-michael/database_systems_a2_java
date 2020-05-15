@@ -2,6 +2,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 
@@ -51,7 +52,6 @@ public class HMethods {
 	
 	// Method to return Hashvalue of Record
 	public int record_to_hash(String hash, int census_year) {
-		//int key = string_to_hash(hash);
 		int key = string_to_hash(hash);
 		// Lecture 6 for Source of Hashing Function
 		int result = (((PRIME_ONE*key + PRIME_TWO) % PRIME_THREE) + census_year) % HASH_TABLE_SIZE;
@@ -125,12 +125,13 @@ public class HMethods {
 		return args.length == 2 ? true : false;
 	}
 	
+	// Method to Count the Total in the Duplicates Counted Column
 	public int count_total_duplicate_keys(Map<Integer, Integer> dup_map) {
 		 int count_total = 0;
         // Prepare Writing to File
 		final long full_start_time = System.nanoTime();
 		
-    	// Go throug the Duplicate Map
+    	// Go through the Duplicate Map
     	for(Map.Entry<Integer, Integer> entry : dup_map.entrySet()) {
 			// Ensure Value > Bucket Size
 			int entry_value = entry.getValue();
@@ -144,12 +145,13 @@ public class HMethods {
 	   
 		final long full_end_time = System.nanoTime();
 		// Required Outputs
-		System.out.println("System - Time Taken to Calculate Collisions: "+
+		System.out.println("System - Time Taken to Calculate Initial Collisions: "+
 		(float)(full_end_time-full_start_time)/1000000000+" seconds");
 		
 		return count_total;
 	}
 	
+	// Method to Write a key, count pair of Duplicate Keys and their Counts
 	public int write_duplicate_map(Map<Integer, Integer> dup_map) {
         int total_lines = 0;
         // Prepare Writing to File
@@ -188,6 +190,7 @@ public class HMethods {
 		return total_lines;
     }
 	
+	// Method to strictly Write the Available Keys and Used Keys
 	public int write_initial_unique_and_available_set(SortedSet<Integer> set) {
         // Prepare Writing to File
 		final long full_start_time = System.nanoTime();
@@ -213,7 +216,7 @@ public class HMethods {
         	final long full_end_time = System.nanoTime();
         	
 			// Required Outputs
-			System.out.println("System - Time Taken to Write Duplicate Map to File: "+
+			System.out.println("System - Time Taken to Write Unique and Available Files: "+
 			(float)(full_end_time-full_start_time)/1000000000+" seconds");
 			
 	    } catch (IOException e) {
@@ -230,43 +233,55 @@ public class HMethods {
         return set.size();
     }
 	
-	public void write_hash_file(SortedSet<Integer> set) {
+	// Method to Write the Hash File Data to a Hash File 
+	public void write_hash_file(Map<Integer, List<Integer>> hash_file_data, int page_size) {
         // Prepare Writing to File
 		final long full_start_time = System.nanoTime();
-		PrintWriter output_uniq = null;
-		PrintWriter output_avail = null;
+		PrintWriter hash_file = null;
 		
         try {
         	// Setup the Output Streams
-        	output_uniq = new PrintWriter(new FileWriter("log_initial_unique_keys.txt"));
-        	output_avail = new PrintWriter(new FileWriter("log_initial_available_keys.txt"));
+        	hash_file = new PrintWriter(new FileWriter("hash."+page_size));
         	
-        	// Go through the Set and Output to Write Streams
+        	// Go through the Hash Data and Output to Write Streams
         	for(int i=0; i<HASH_TABLE_SIZE; i++) {
-    			// if Unique Write to fn1
-    			if(set.contains(i)) {
-    				output_uniq.write(i+"\n");
+    			// if the Hash File has the Key, Write out its key, file_offset
+    			if(hash_file_data.containsKey(i)) {
+    				List<Integer> file_offset_pointers = hash_file_data.get(i);
+    				int file_offset_size = file_offset_pointers.size(); 
+    				for(int j=0; j<file_offset_size; j++) {
+    					hash_file.write(i+","+file_offset_pointers.get(j)+"\n");	
+    				}
+    				
+    				if(file_offset_size != BUCKET_SIZE_USED) {
+    					int counter = file_offset_size;
+    					while(counter < BUCKET_SIZE_USED) {
+        					hash_file.write("\n");
+        					counter++;
+    					}
+    				}
     			}
-    			// if Available Write to fn2 
+    			// if the Index didn't exist i.e., Vacant Slot, Write out 2 New Lines
     			else {
-    				output_avail.write(i+"\n");
+    				int counter = 0;
+    				while(counter < BUCKET_SIZE_USED) {
+    					hash_file.write("\n");
+    					counter++;
+					}
     			}
     		}
         	final long full_end_time = System.nanoTime();
         	
 			// Required Outputs
-			System.out.println("System - Time Taken to Write Duplicate Map to File: "+
+			System.out.println("System - Time Taken to Write Hash File: "+
 			(float)(full_end_time-full_start_time)/1000000000+" seconds");
 			
 	    } catch (IOException e) {
-	    	System.err.println("Error - Couldn't Write to Unique and Available Files!");
+	    	System.err.println("Error - Couldn't Write to Hash File hash."+page_size+"!");
 	    } finally {
 			// Closing output streams
-			if (output_uniq != null) {
-				output_uniq.close();
-			}
-			if (output_avail != null) {
-				output_avail.close();
+			if (hash_file != null) {
+				hash_file.close();
 			}
 	    }
     }
