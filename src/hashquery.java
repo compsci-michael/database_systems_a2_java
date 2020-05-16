@@ -48,7 +48,6 @@ public class hashquery {
 			// Create the Anticipated Hash Value
 			int hash_value = hm.record_to_hash(street_address, census_year);
 			// Ensure Appropriate Shifting of Search
-			System.out.println(hash_value); //hash_value = 115502;
 			int line_number = hash_value*HMethods.BUCKET_SIZE_USED;
 			
 			// Stores Read Input from File
