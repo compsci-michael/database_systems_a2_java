@@ -164,31 +164,13 @@ public class HMethods {
 	
 	// Method to return Hashvalue of Record
 	public int record_to_hash(String street_address, int census_year) {
-		int key = string_to_hash(street_address.toLowerCase());
+		// Turns Street Address to its equivalent hashCode (32 byte)
+		int key = street_address.toLowerCase().hashCode();
 		// Lecture 6 for Source of Hashing Function
 		int result = (((PRIME_ONE*key + PRIME_TWO) % PRIME_THREE) + census_year) % HASH_TABLE_SIZE;
 		// Get Correct Positive Value 
 		return (result < 0) ? result*-1 : result;
 	}
-	
-	// Sourced and Adapated from: 
-	// https://stackoverflow.com/questions/37580741/seemingly-easy-fnv1-hashing
-	//-implementation-results-in-a-lot-of-collisions
-	public int string_to_hash(String s) {
-        final BigInteger FNV_offset_basis = new BigInteger("14695981039346656037");
-        final BigInteger FNV_prime = new BigInteger("1099511628211");
-
-        BigInteger hash = new BigInteger(FNV_offset_basis.toString());
-
-        for (int i = 0; i < s.length(); i++) {
-            int charValue = s.charAt(i);
-
-            hash = hash.multiply(FNV_prime);
-            hash = hash.xor(BigInteger.valueOf((int) charValue & 0xffff));
-        }
-
-        return hash.intValue();
-    }
 	
 	// Method to Count the Total in the Duplicates Counted Column
 	public int count_total_duplicate_keys(Map<Integer, Integer> dup_map) {
