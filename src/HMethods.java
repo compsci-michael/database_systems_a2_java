@@ -1,18 +1,18 @@
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.math.BigInteger;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedSet;
-
 ///////////////////////////////////////////////////////////////////////////////
-// File Written by: Michael A (s3662507) (Last Edit: 15/05/2020)
+// File Written by: Michael A (s3662507) (Last Edit: 16/05/2020)
 // Database Systems - Assignment 02
 // Purpose of this Class:
 // This Class is used to hold useful functionalities that can be called upon
 // in the main method
 ///////////////////////////////////////////////////////////////////////////////
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.math.BigInteger;
+import java.nio.ByteBuffer;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
 
 public class HMethods {
 	// -------------------------- Final Constants -------------------------- //
@@ -158,7 +158,7 @@ public class HMethods {
 	}
 	// Method to extract the Street Address
 	public String street_address_query(String[] args) {
-		return args[CENSUS_YEAR_ARGUEMENT_QUERY];
+		return args[STREET_ADDRESS_ARGUEMENT_QUERY];
 	}
 	
 	
@@ -211,7 +211,7 @@ public class HMethods {
 		final long full_end_time = System.nanoTime();
 		// Required Outputs
 		System.out.println("System - Time Taken to Calculate Initial Collisions: "+
-		(float)(full_end_time-full_start_time)/1000000000+" seconds");
+				(float)(full_end_time-full_start_time)/1000000000+" seconds");
 		
 		return count_total;
 	}
@@ -241,7 +241,7 @@ public class HMethods {
 
         	// Required Outputs
     		System.out.println("System - Time Taken to Write Duplicate Map to File: "+
-    		(float)(full_end_time-full_start_time)/1000000000+" seconds");
+    				(float)(full_end_time-full_start_time)/1000000000+" seconds");
     		
 	    } catch (IOException e) {
 	    	System.err.println("Error - Couldn't Write to log_count_of_duplicates.csv!");
@@ -282,7 +282,7 @@ public class HMethods {
         	
 			// Required Outputs
 			System.out.println("System - Time Taken to Write Unique and Available Files: "+
-			(float)(full_end_time-full_start_time)/1000000000+" seconds");
+					(float)(full_end_time-full_start_time)/1000000000+" seconds");
 			
 	    } catch (IOException e) {
 	    	System.err.println("Error - Couldn't Write to Unique and Available Files!");
@@ -339,7 +339,7 @@ public class HMethods {
         	
 			// Required Outputs
 			System.out.println("System - Time Taken to Write Hash File: "+
-			(float)(full_end_time-full_start_time)/1000000000+" seconds");
+					(float)(full_end_time-full_start_time)/1000000000+" seconds");
 			
 	    } catch (IOException e) {
 	    	System.err.println("Error - Couldn't Write to Hash File hash."+page_size+"!");
@@ -350,6 +350,56 @@ public class HMethods {
 			}
 	    }
     }
+	
+	// Method to take in a Read Record Data (rr) to Create and Return the Record
+	public Record hash_query_read_record(byte[] rr) {
+		// Holds the Queried Record (qr)
+		Record qr = new Record();
+		// A Counter for the Buffer of Read Record
+		int c = 0;
+		
+		qr.set_census_yr(ByteBuffer.wrap(rr, c, INT_SIZE).getInt());
+		c+=INT_SIZE;
+		qr.set_block_id(ByteBuffer.wrap(rr, c, INT_SIZE).getInt());
+		c+=INT_SIZE;
+		qr.set_prop_id(ByteBuffer.wrap(rr, c, INT_SIZE).getInt());
+		c+=INT_SIZE;
+		qr.set_base_prop_id(ByteBuffer.wrap(rr, c, INT_SIZE).getInt());
+		c+=INT_SIZE;
+		qr.set_building_name(byte_buffer_to_string(rr, c, BUILDING_NAME_SIZE));
+		c+=BUILDING_NAME_SIZE;
+		qr.set_street_address(byte_buffer_to_string(rr, c, STREET_ADDRESS_SIZE));
+		c+=STREET_ADDRESS_SIZE;
+		qr.set_suburb(byte_buffer_to_string(rr, c, SUBURB_SIZE));
+		c+=SUBURB_SIZE;
+		qr.set_construct_yr(ByteBuffer.wrap(rr, c, INT_SIZE).getInt());
+		c+=INT_SIZE;
+		qr.set_refurbished_yr(ByteBuffer.wrap(rr, c, INT_SIZE).getInt());
+		c+=INT_SIZE;
+		qr.set_num_floors(ByteBuffer.wrap(rr, c, INT_SIZE).getInt());
+		c+=INT_SIZE;
+		qr.set_space_usage(byte_buffer_to_string(rr, c, SPACE_USAGE_SIZE));
+		c+=SPACE_USAGE_SIZE;
+		qr.set_access_type(byte_buffer_to_string(rr, c, ACCESS_TYPE_SIZE));
+		c+=ACCESS_TYPE_SIZE;
+		qr.set_access_desc(byte_buffer_to_string(rr, c, ACCESS_DESC_SIZE));
+		c+=ACCESS_DESC_SIZE;
+		qr.set_access_rating(ByteBuffer.wrap(rr, c, INT_SIZE).getInt());
+		c+=INT_SIZE;
+		qr.set_bicycle_spaces(ByteBuffer.wrap(rr, c, INT_SIZE).getInt());
+		c+=INT_SIZE;
+		qr.set_has_showers(ByteBuffer.wrap(rr,c, INT_SIZE).getInt());
+		c+=INT_SIZE;
+		qr.set_x_coor(ByteBuffer.wrap(rr, c, DOUBLE_SIZE).getDouble());
+		c+=DOUBLE_SIZE;
+		qr.set_y_coor(ByteBuffer.wrap(rr, c, DOUBLE_SIZE).getDouble());
+		c+=DOUBLE_SIZE;
+		qr.set_location(byte_buffer_to_string(rr, c, LOCATION_SIZE));
+		c+=LOCATION_SIZE;
+		
+		// Returns the Queried Record
+		return qr;
+	}
 	
 	// Method to Fill a Character Array full of # and Insert the String
 	public String char_fill(String s, int size) {

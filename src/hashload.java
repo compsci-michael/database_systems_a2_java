@@ -1,3 +1,11 @@
+///////////////////////////////////////////////////////////////////////////////
+// File Written by: Michael A (s3662507) (Last Edit: 16/05/2020)
+// Database Systems - Assignment 02
+// Purpose of this Class:
+// This is the Driver Class which contains the Main method for loading the
+// java heap file and creating a Hashfile
+///////////////////////////////////////////////////////////////////////////////
+
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.File;
@@ -11,13 +19,6 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-///////////////////////////////////////////////////////////////////////////////
-// File Written by: Michael A (s3662507) (Last Edit: 15/05/2020)
-// Database Systems - Assignment 02
-// Purpose of this Class:
-// This is the Driver Class which contains the Main method for loading the
-// java heap file and creating a Hashfile
-///////////////////////////////////////////////////////////////////////////////
 public class hashload {
 	// Must be able to execute the following: java dbload -p pagesize datafile
 	public static void main(String[] args) {
@@ -40,6 +41,7 @@ public class hashload {
 			int number_of_pages_read = 0;
 			int number_of_records_read = 0;
 			int num_of_duplicate_keys = 0;
+			int num_of_actual_duplicate_keys = 0;
 			int count_of_duplicate_keys = 0;
 			int num_of_initial_unique_keys = 0;
 			int counted_num_of_collisions = 0;
@@ -163,7 +165,7 @@ public class hashload {
 						
 						// Save Value and Move
 				        hash_file_data.put(vacant_spot_ptr, hash_and_file_offset_pointers);
-				        
+
 						// Keeps Track of Page-Record File Offset
 						total_file_offset+=HMethods.RECORD_SIZE;
 						number_of_records_read++;
@@ -176,7 +178,7 @@ public class hashload {
 					// Increment Page Counter
 					number_of_pages_read++;
 					// Keeps Track of Page File Offset
-					total_file_offset = number_of_pages_read*page_size;		
+					total_file_offset = number_of_pages_read*page_size;
 				}
 				
 				// ------------------ Statistics Cleanup ------------------ // 
@@ -185,6 +187,7 @@ public class hashload {
 					num_of_initial_unique_keys = hm.write_initial_unique_and_available_set(initial_unique_keys);
 					// Writes to Duplicate Key File and Gets Number of Duplicate Keys
 					num_of_duplicate_keys = hm.write_duplicate_map(duplicate_keys); 
+					num_of_actual_duplicate_keys = duplicate_keys.size();
 					count_of_duplicate_keys = hm.count_total_duplicate_keys(duplicate_keys);
 					
 					// Clear Memory
@@ -197,13 +200,13 @@ public class hashload {
 				
 				// Required Outputs				
 				System.out.println("System - Time Taken to Read the Heap File and Calculate For Hash File: "+ 
-				(float)(hash_calc_end_time-hash_calc_start_time)/1000000000+" seconds");
+						(float)(hash_calc_end_time-hash_calc_start_time)/1000000000+" seconds");
 				
 				// Write the Hash File
 				hm.write_hash_file(hash_file_data, page_size);
 
 				System.out.println("System - Time Taken to Execute Script: "+
-				(float)(full_end_time-full_start_time)/1000000000+" seconds");
+						(float)(full_end_time-full_start_time)/1000000000+" seconds");
 
 				// ----------------- Statistics Reporting ------------------ // 
 				if(requires_statistics) {
@@ -216,15 +219,16 @@ public class hashload {
 					System.out.printf("|%-35s%-30s|\n", "Table Size Used:", HMethods.HASH_TABLE_SIZE);
 					System.out.printf("|%-35s%-30s|\n", "Bucket Size Used:", HMethods.BUCKET_SIZE_USED);
 					System.out.println("|----------------- Initial Hash Table Attributes -----------------|");
+					System.out.printf("|%-35s%-30s|\n", "Count of Duplicate Keys:", num_of_actual_duplicate_keys);
 					System.out.printf("|%-35s%-30s|\n", "Count of Duplicate Keys (-Bucket):", num_of_duplicate_keys);
 					System.out.printf("|%-35s%-30s|\n", "Total Count of Duplicates:", count_of_duplicate_keys);
-					System.out.printf("|%-35s%-30s|\n", "Count of Initial Unique Keys:", num_of_initial_unique_keys);
+					System.out.printf("|%-35s%-30s|\n", "Count of Initial Unique Keys:", num_of_initial_unique_keys-num_of_actual_duplicate_keys);
+					System.out.printf("|%-35s%-30s|\n", "Number of Initial Used Keys:", num_of_initial_unique_keys);
 					System.out.printf("|%-35s%-30s|\n", "Count of Initial Available Keys:", num_of_initial_available_keys);
 					System.out.println("|--------------------------- Hash Table --------------------------|");	
 					System.out.printf("|%-35s%-30s|\n", "Number of Keys Used:", hash_file_data.size());
-					System.out.printf("|%-35s%-30s|\n", "Count of Keys Linear Probing Used:", hash_file_data.size()-num_of_initial_unique_keys);
-					
 					System.out.printf("|%-35s%-30s|\n", "Number of Available Keys:", HMethods.HASH_TABLE_SIZE-hash_file_data.size());
+					System.out.printf("|%-35s%-30s|\n", "Count of Keys Linear Probing Used:", hash_file_data.size()-num_of_initial_unique_keys);
 					System.out.printf("|%-35s%-30s|\n", "Number of Linear Probing Done:", counted_num_of_collisions);
 					System.out.printf("|%-35s%05.2f%%                        |\n", "Occupancy:", occupancy);
 					System.out.println("|-----------------------------------------------------------------|");	

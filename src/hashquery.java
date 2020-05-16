@@ -1,3 +1,10 @@
+///////////////////////////////////////////////////////////////////////////////
+// File Written by: Michael A (s3662507) (Last Edit: 16/05/2020)
+// Database Systems - Assignment 02
+// Purpose of this Class:
+// This is the Driver Class which contains the Main method for loading the
+// java heap file and creating a Hashfile
+///////////////////////////////////////////////////////////////////////////////
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -8,13 +15,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-///////////////////////////////////////////////////////////////////////////////
-// File Written by: Michael A (s3662507) (Last Edit: 13/05/2020)
-// Database Systems - Assignment 02
-// Purpose of this Class:
-// This is the Driver Class which contains the Main method for loading the
-// java heap file and creating a Hashfile
-///////////////////////////////////////////////////////////////////////////////
 public class hashquery {
 	private static final int FILE_OFFSET_INDEX = 1;
 	// Must be able to execute the following: java dbload -p pagesize datafile
@@ -48,7 +48,9 @@ public class hashquery {
 			// Create the Anticipated Hash Value
 			int hash_value = hm.record_to_hash(street_address, census_year);
 			// Ensure Appropriate Shifting of Search
+			System.out.println(hash_value); //hash_value = 115502;
 			int line_number = hash_value*HMethods.BUCKET_SIZE_USED;
+			
 			// Stores Read Input from File
 			String line;
 			// if the Pointer was near or at the end of the file and we need to 
@@ -64,7 +66,8 @@ public class hashquery {
 			BufferedInputStream heap_file_buffer = null;
 			DataInputStream heap_file_reader = null;
 			
-			
+			final long hash_read_start_time = System.nanoTime();
+
 			try {
 				do {
 					// Setting up File Operations
@@ -74,7 +77,8 @@ public class hashquery {
 					// Stores Number of Line to Seek
 					int move_ptr = 0;
 									
-					System.out.println(hash_value);
+			//System.out.println(hash_value);
+					
 					// Go through the File and Locate the Hash Value
 					while ((line = hash_file_reader.readLine()) != null) {
 						// Will Seek if First Time Reading File
@@ -88,7 +92,9 @@ public class hashquery {
 							String[] string_delimited = line.split(",");
 							file_offset_pointers.add(string_delimited[FILE_OFFSET_INDEX]);
 						}
-						System.out.println(line);
+						
+			//System.out.println(line);
+						
 						// if we Reach an Empty String (Empty Line)
 						if(line.equals("")) {
 							// We Finished
@@ -106,11 +112,11 @@ public class hashquery {
 				System.err.println("Error - Data Couldn't Be Extracted!");				
 			}
 			
-			for(int i=0; i<file_offset_pointers.size(); i++) {
-				System.out.println(file_offset_pointers.get(i));
-			}
+			final long hash_read_end_time = System.nanoTime();
+			final long heap_read_start_time = System.nanoTime();
 			
-			/*
+			// Holds all Successfully Queried Items
+			List<Record> returned_records = new ArrayList<Record>();
 			// Step 3: Read from the Heap File and Locate Lines
 			try {
 				// Setting up File Operations
@@ -118,37 +124,56 @@ public class hashquery {
 				heap_file = new FileInputStream(new File(heap_file_name));
 				heap_file_buffer = new BufferedInputStream(heap_file,page_size);
 				heap_file_reader = new DataInputStream(heap_file_buffer);
-				// This will store each Page being Read in
-				byte[] read_page = new byte[page_size];
-				// A Counter for the Buffer of r_page
-				int byte_count = 0;
+				// This will store each Record being Read in
+				byte[] read_record = new byte[HMethods.RECORD_SIZE];
+				// An Offset for the Initial and Next for Moving the skipBytes
+				int file_offset_initial=0, file_offset_next;
 				
-				// Go through the File and grab the page_size amount of Bytes
-				while (heap_file_reader.read(read_page) != -1) {
-					List<Record> returned_records = new ArrayList<Record>();
-					
-					while((char)read_page[byte_count] != '#') {
-						// Stores the Records that Are Retrieved from the Hash
-						Record new_record;	
+				// Go through the File and Grab Specific Locations
+				for(int i=0; i<file_offset_pointers.size(); i++) {
+					file_offset_next = Integer.parseInt(file_offset_pointers.get(i));
+					// This may create issues if Threading is Used but should be fine for this application
+					heap_file_reader.skipBytes(file_offset_next-file_offset_initial);
+					// Read in the Record
+					heap_file_reader.read(read_record);
+					// Stores the Record that is Parsed
+					Record queried_record = hm.hash_query_read_record(read_record); 
+
+					// Check for the Queries Conditions
+					if(queried_record.matches_query(census_year, street_address)) {
+						returned_records.add(queried_record);
 					}
-					// Reset the Buffer
-					read_page = new byte[page_size];
-					// Reset the Buffer Counter ready for the next Page
-					byte_count = 0;		
+						
+					// Ensure skipBytes skips Accurately to the Next Record
+					file_offset_initial = file_offset_next+HMethods.RECORD_SIZE;
 				}
 			} 
 			// Catching IOException error
 			catch (IOException e) {
 				System.err.println("Error - Data Couldn't Be Extracted!");				
 			}
-			*/ 
+			
+			final long heap_read_end_time = System.nanoTime();
 		
+			// Step 4: Output Queried Records, if None was Found, Display Error Message
+			if(returned_records.size() > 0) {
+				System.out.println("\n|----------------------------- Records -----------------------------|");
+				for(int i=0; i<returned_records.size(); i++) {
+					returned_records.get(i).record_display();
+				}
+				System.out.println("|-------------------------- End of Records -------------------------|\n\n");
+			} else {
+				System.err.println("Error - No Record Found for "+census_year+" and "+street_address+"!");
+			}
 			final long full_end_time = System.nanoTime();
 			
 			// Required Outputs				
-
+			System.out.println("System - Time Taken to Read and Locate from Hash File: "+
+					(float)(hash_read_end_time-hash_read_start_time)/1000000000+" seconds");
+			System.out.println("System - Time Taken to Read and Extract from Heap File: "+
+					(float)(heap_read_end_time-heap_read_start_time)/1000000000+" seconds");
 			System.out.println("System - Time Taken to Execute Script: "+
-			(float)(full_end_time-full_start_time)/1000000000+" seconds");
+					(float)(full_end_time-full_start_time)/1000000000+" seconds");
 		}
 	}
 }

@@ -135,13 +135,7 @@ public class Record {
 	}	
 	
 	// Method for Searching for a String in the Record
-	public boolean contains(String sc) {
-		if(sc.equals("#")) {
-			sc = "###############################################################";
-		}
-		if(new String(this.building_name).toLowerCase().contains(sc.toLowerCase())) {
-			return true;
-		}
-		return false;
+	public boolean matches_query(int census_yr, String street_address) {
+		return (census_yr == this.census_yr && street_address.equals(this.street_address)) ? true : false;
 	}
 }
