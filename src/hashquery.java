@@ -28,6 +28,8 @@ public class hashquery {
 		int census_year;
 		// Stores the Street Address
 		String street_address;
+		// Output Times if Error Didn't Occur
+		boolean error_occured = false;
 		
 		// Step 1: Validate the Input
 		boolean correct_input = hm.input_validation_hashquery(args);
@@ -163,16 +165,20 @@ public class hashquery {
 				System.out.println("|-------------------------- End of Records -------------------------|\n\n");
 			} else {
 				System.err.println("Error - No Record Found for "+census_year+" and "+street_address+"!");
+				error_occured = true;
 			}
 			final long full_end_time = System.nanoTime();
 			
-			// Required Outputs				
-			System.out.println("System - Time Taken to Read and Locate from Hash File: "+
-					(float)(hash_read_end_time-hash_read_start_time)/1000000000+" seconds");
-			System.out.println("System - Time Taken to Read and Extract from Heap File: "+
-					(float)(heap_read_end_time-heap_read_start_time)/1000000000+" seconds");
-			System.out.println("System - Time Taken to Execute Script: "+
-					(float)(full_end_time-full_start_time)/1000000000+" seconds");
+			// Ensure Print Statements Happen if Error Didn't Occur
+			if(!error_occured) {
+				// Required Outputs				
+				System.out.println("System - Time Taken to Read and Locate from Hash File: "+
+						(float)(hash_read_end_time-hash_read_start_time)/1000000000+" seconds");
+				System.out.println("System - Time Taken to Read and Extract from Heap File: "+
+						(float)(heap_read_end_time-heap_read_start_time)/1000000000+" seconds");
+				System.out.println("System - Time Taken to Execute Script: "+
+						(float)(full_end_time-full_start_time)/1000000000+" seconds");
+			}
 		}
 	}
 }
