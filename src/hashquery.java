@@ -3,7 +3,7 @@
 // Database Systems - Assignment 02
 // Purpose of this Class:
 // This is the Driver Class which contains the Main method for loading the
-// java heap file and creating a Hashfile
+// java heap file and hash index file to extract the queried records
 ///////////////////////////////////////////////////////////////////////////////
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -17,7 +17,7 @@ import java.util.List;
 
 public class hashquery {
 	private static final int FILE_OFFSET_INDEX = 1;
-	// Must be able to execute the following: java dbload -p pagesize datafile
+	// Must be able to execute the following: java hashload <census year> <street address> <pagesize>
 	public static void main(String[] args) {
 		final long full_start_time = System.nanoTime();
 		// Set up Helper Methods
@@ -123,7 +123,7 @@ public class hashquery {
 				// Setting up File Operations
 				System.out.println("System - Loading Heap File "+heap_file_name);
 				heap_file = new FileInputStream(new File(heap_file_name));
-				heap_file_buffer = new BufferedInputStream(heap_file,page_size);
+				heap_file_buffer = new BufferedInputStream(heap_file, page_size);
 				heap_file_reader = new DataInputStream(heap_file_buffer);
 				// This will store each Record being Read in
 				byte[] read_record = new byte[HMethods.RECORD_SIZE];

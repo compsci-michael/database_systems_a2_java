@@ -130,7 +130,7 @@ public class Record {
 		System.out.print("Building Name: "+this.building_name+", ");
 		System.out.print("Street Address: "+this.street_address+", ");
 		System.out.print("Suburb: "+this.suburb+", ");
-		System.out.print("Construction Year: "+this.construct_yr+", ");
+		System.out.print("Construction Year: "+this.construct_yr);
 		System.out.println();
 	}	
 	
