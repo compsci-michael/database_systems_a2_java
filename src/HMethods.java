@@ -8,7 +8,6 @@
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +34,7 @@ public class HMethods {
 			+ACCESS_TYPE_SIZE
 			+ACCESS_DESC_SIZE
 			+LOCATION_SIZE;
+	
 		// --------------- Input Validation Flag Checks ---------------- //
 	public static final int PAGE_SIZE_ARGUEMENT_LOAD = 0;
 	public static final int STATISTICS_ARGUEMENT = 1;
@@ -43,6 +43,11 @@ public class HMethods {
 	public static final int STREET_ADDRESS_ARGUEMENT_QUERY = 1;
 	public static final int PAGE_SIZE_ARGUEMENT_QUERY = 2;
 
+	public static final int CENSUS_YEAR_FROM_ARGUEMENT_RANGED_QUERY = 0;
+	public static final int CENSUS_YEAR_TO_ARGUEMENT_RANGED_QUERY = 1;
+	public static final int STREET_ADDRESS_ARGUEMENT_RANGED_QUERY = 2;
+	public static final int PAGE_SIZE_ARGUEMENT_RANGED_QUERY = 3;
+	
 		// ------------------- Fields in Flat File --------------------- //
 	public static final int CENSUS_YR = 0;
 	public static final int BLOCK_ID = 1;
@@ -138,6 +143,40 @@ public class HMethods {
 		return is_correct;	
 	}
 	
+	// Method to Validate the Input Arguements for hashquery
+		public boolean input_validation_hashquery_ranged(String[] args) {
+			boolean is_correct = false;
+			boolean override = false;
+			// Step 1: Check if number of Arguements is Correct
+			if(args.length < 4 || args.length > 4) {
+				System.err.println("Error - Incorrect Number of Arguements!");
+				System.err.println("Format must be of the following:\njava hashquery <census year from> <census year to> <street address> <pagesize>");
+			} else {
+				// Step 2: Validate Input
+				try {
+					// Check that the pagesize arguement is a number
+					Integer.parseInt(args[PAGE_SIZE_ARGUEMENT_RANGED_QUERY].trim());
+					// Check the the census year from and to arguement is a Number 
+					int from = Integer.parseInt(args[CENSUS_YEAR_FROM_ARGUEMENT_RANGED_QUERY].trim());
+					int to = Integer.parseInt(args[CENSUS_YEAR_TO_ARGUEMENT_RANGED_QUERY].trim());
+					// Ensure from <= to
+					if(!(from <= to)) {
+						System.err.println("Error - Census Year From Must Be Less Than or Equal To Census To!");
+				    	override = true;
+					}
+			    } catch (NumberFormatException nfe) {
+			    	System.err.println("Error - That wasn't a Number!");
+			    	override = true;
+			    }
+				if(!override) {
+					is_correct = true;
+				} else {
+					System.err.println("Please try again!\n");
+				}
+			}
+			// Step 3: Return Value
+			return is_correct;	
+		}
 	
 	// Method to extract the Page Size
 	public int page_size_load(String[] args) {

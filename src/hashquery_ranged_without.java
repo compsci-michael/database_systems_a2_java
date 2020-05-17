@@ -4,6 +4,7 @@
 // Purpose of this Class:
 // This is the Driver Class which contains the Main method for loading the
 // java heap file and conduct a Linear Search to extract the queried records.
+// in a range of census year
 ///////////////////////////////////////////////////////////////////////////////
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
@@ -14,7 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class hashquery_without {
+public class hashquery_ranged_without {
 	// Must be able to execute the following: java hashload <census year> <street address> <pagesize>
 	public static void main(String[] args) {
 		final long full_start_time = System.nanoTime();
@@ -23,19 +24,21 @@ public class hashquery_without {
 		// Store the Page Size
 		int page_size;
 		// Stores the Census Year
-		int census_year;
+		int census_year_from;
+		int census_year_to;
 		// Stores the Street Address
 		String street_address;
 		
 		// Step 1: Validate the Input
-		boolean correct_input = hm.input_validation_hashquery(args);
+		boolean correct_input = hm.input_validation_hashquery_ranged(args);
 		if(correct_input) {
 			// Stores the Page Size
-			page_size = hm.page_size_query(args);
+			page_size = Integer.parseInt(args[HMethods.PAGE_SIZE_ARGUEMENT_RANGED_QUERY].trim());
 			// Stores the Census Year
-			census_year = hm.census_year_query(args);
+			census_year_from = Integer.parseInt(args[HMethods.CENSUS_YEAR_FROM_ARGUEMENT_RANGED_QUERY].trim());
+			census_year_to = Integer.parseInt(args[HMethods.CENSUS_YEAR_TO_ARGUEMENT_RANGED_QUERY].trim());
 			// Stores the Street Address
-			street_address = hm.street_address_query(args);
+			street_address = args[HMethods.STREET_ADDRESS_ARGUEMENT_RANGED_QUERY];
 			// Load from the filename "heap.<page_size>"
 			String heap_file_name = "heap."+page_size;
 								
@@ -71,8 +74,13 @@ public class hashquery_without {
 						// Create the Record
 						Record queried_record = hm.hash_query_read_record(read_record);
 						// Check for the Queries Conditions
-						if(queried_record.matches_query(census_year, street_address)) {
-							returned_records.add(queried_record);
+						int census_year_inbetween = census_year_from;
+						while(census_year_inbetween <= census_year_to) {
+							if(queried_record.matches_query(census_year_inbetween, street_address)) {
+								returned_records.add(queried_record);
+								break;
+							}
+							census_year_inbetween++;
 						}
 						from_c+=HMethods.RECORD_SIZE;
 					}
@@ -97,7 +105,8 @@ public class hashquery_without {
 				}
 				System.out.println("|-------------------------- End of Records -------------------------|\n\n");
 			} else {
-				System.err.println("Error - No Record Found for "+census_year+" and "+street_address+"!");
+				System.err.println("Error - No Record Found for the Range "+
+					census_year_from+" to "+census_year_to+" and "+street_address+"!");
 			}
 			final long full_end_time = System.nanoTime();
 			
