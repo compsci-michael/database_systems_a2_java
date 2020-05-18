@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// File Written by: Michael A (s3662507) (Last Edit: 16/05/2020)
+// File Written by: Michael A (s3662507) (Last Edit: 18/05/2020)
 // Database Systems - Assignment 02
 // Purpose of this Class:
 // This is the Driver Class which contains the Main method for loading the
@@ -51,12 +51,22 @@ public class hashquery_ranged {
 			String hash_file_name = "hash."+page_size;
 			// Load from the filename "heap.<page_size>"
 			String heap_file_name = "heap."+page_size;
-			
+			// Sorted Set to Keep File Offsets in Ascending Order
 	        SortedSet<Integer> file_offset_pointers = new TreeSet<>(); 
 			
 			// Create the Anticipated Hash Value
 			int hash_value_from = hm.record_to_hash(street_address, census_year_from);
 			int hash_value_to = hm.record_to_hash(street_address, census_year_to);
+	        
+	        // Special Case where Hash Function returns negative
+	        // Must Swap Values
+	        if(hash_value_to < hash_value_from) {
+	        	int old_hash_from = hash_value_from;
+	        	hash_value_from = hash_value_to;
+	        	hash_value_to = old_hash_from;
+	        }
+	        
+			//System.out.println(hash_value_from+","+hash_value_to);
 			// Ensure Appropriate Shifting of Search
 			int line_number_from = hash_value_from*HMethods.BUCKET_SIZE_USED;
 			int line_number_to_expected = hash_value_to*HMethods.BUCKET_SIZE_USED; 
