@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// File Written by: Michael A (s3662507) (Last Edit: 17/05/2020)
+// File Written by: Michael A (s3662507) (Last Edit: 18/05/2020)
 // Database Systems - Assignment 02
 // Purpose of this Class:
 // This is the Driver Class which contains the Main method for loading the
@@ -114,7 +114,9 @@ public class hashquery_ranged_without {
 			// Heap File Search, Total Execution Time
 			float heap_read = (float)(heap_read_end_time-heap_read_start_time)/1000000000;
 			float exe_time = (float)(full_end_time-full_start_time)/1000000000;
-			System.out.println(heap_read+","+exe_time);
+			// Required Outputs				
+			System.out.println("System - Time Taken to Read and Extract from Heap File: "+heap_read+" seconds");
+			System.out.println("System - Time Taken to Execute Script: "+exe_time+" seconds");
 		}
 	}
 }
